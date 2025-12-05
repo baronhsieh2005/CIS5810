@@ -1,3 +1,9 @@
 
 runs/
 *.pt
+custom_dataset
+dead_lift_variant
+raw_frames_discarded
+results
+test
+vit_squat_model

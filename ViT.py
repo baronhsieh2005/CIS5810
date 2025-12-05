@@ -5,24 +5,28 @@ import numpy as np
 import evaluate
 
 # 1. Load dataset (folder must be structured by class names)
-dataset = load_dataset("imagefolder", data_dir="./dataset/train", split="train")
+dataset = load_dataset("imagefolder", data_dir="./custom_dataset", split="train")
 dataset = dataset.train_test_split(test_size=0.2)
+train_dataset = dataset["train"]
+val_dataset = dataset["test"]
 # 2. Load pretrained ViT
 model_name = "google/vit-base-patch16-224"
 model = ViTForImageClassification.from_pretrained(
     model_name,
     num_labels=2,  # Correct / Incorrect
     id2label={0: "incorrect", 1: "correct"},
+    ignore_mismatched_sizes=True
 )
 
 # 3. Preprocess images
 processor = ViTImageProcessor.from_pretrained(model_name)
 
 
-def transform(example):
-    inputs = processor(images=example["image"], return_tensors="pt")
-    example["pixel_values"] = inputs["pixel_values"][0]
-    return example
+def transform(example_batch):
+    # Process a batch of images
+    inputs = processor(example_batch["image"], return_tensors="pt")
+    inputs["labels"] = example_batch["label"]
+    return inputs
 
 
 dataset = dataset.with_transform(transform)
@@ -39,7 +43,7 @@ def compute_metrics(p):
 # 5. Training arguments
 training_args = TrainingArguments(
     output_dir="./results",
-    evaluation_strategy="epoch",
+    eval_strategy="epoch",
     save_strategy="epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=16,
@@ -48,7 +52,8 @@ training_args = TrainingArguments(
     weight_decay=0.01,
     logging_dir="./logs",
     logging_steps=10,
-    push_to_hub=False
+    push_to_hub=False,
+    remove_unused_columns=False
 )
 
 # 6. Trainer
@@ -56,7 +61,7 @@ trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=dataset["train"],
-    eval_dataset=dataset["val"],
+    eval_dataset=dataset["test"],
     tokenizer=processor,
     compute_metrics=compute_metrics
 )
