@@ -6,6 +6,7 @@ from PIL import Image
 from ultralytics import YOLO
 from transformers import AutoImageProcessor, AutoModel
 
+
 from model_setup import (
     get_yolo_keypoints_from_pil,
     get_dino_patch_features,
@@ -18,6 +19,12 @@ from typing import Tuple
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
+
+from form_analysis import (
+    analyze_elbow_line,
+    classify_flare
+
+)
 
 class BenchPhaseMLP(nn.Module):
     def __init__(self, input_dim, hidden_dim=256, hidden_dim2=128, num_classes=2, dropout=0.3):
@@ -93,4 +100,61 @@ async def predict(file: UploadFile = File(...)):
         },
     }
 
+"""
+@app.post("/analyze_form")
+async def analyze_bench_form(file: UploadFile = File(...)):
+    contents = await file.read()
+    img_pil = Image.open(io.BytesIO(contents)).convert("RGB")
+    img_np = np.array(img_pil)
 
+    # Run YOLO Pose
+    results = yolo_model.predict(img_np, save=False, verbose=False)
+    if len(results) == 0 or len(results[0].keypoints.xy) == 0:
+        raise HTTPException(status_code=422, detail="No person detected")
+
+    kpts = results[0].keypoints.xy[0].cpu().numpy()
+
+    # Run form analysis
+    analysis = analyze_form(kpts)
+
+    return analysis
+
+"""
+
+@app.post("/elbow_line_angle")
+async def elbow_line_angle_api(file: UploadFile = File(...)):
+    contents = await file.read()
+    img = Image.open(io.BytesIO(contents)).convert("RGB")
+    img_np = np.array(img)
+    results = yolo_model.predict(img_np, verbose=False)
+    kpts = results[0].keypoints.xy[0].cpu().numpy()
+    return analyze_elbow_line(kpts)
+
+@app.post("/elbow_flare")
+async def elbow_flare_api(file: UploadFile = File(...), threshold: float = 40.0):
+    """
+    Classifies elbow flare from a BENCH-PRESS LOWERED POSITION image.
+    Assumes img contains a clear bottom-position rep.
+    """
+
+    # Read img
+    contents = await file.read()
+    try:
+        img = Image.open(io.BytesIO(contents)).convert("RGB")
+    except:
+        raise HTTPException(status_code=400, detail="Invalid image file")
+
+    img_np = np.array(img)
+
+    # YOLO Pose Detection
+    results = yolo_model.predict(img_np, verbose=False)
+    if len(results) == 0 or len(results[0].keypoints.xy) == 0:
+        raise HTTPException(status_code=422, detail="No person detected")
+
+    # Get keypoints for first detected person
+    kpts = results[0].keypoints.xy[0].cpu().numpy()  # shape (17,2)
+
+    # Flare classification from helper file
+    analysis = classify_flare(kpts, side_threshold=threshold)
+
+    return analysis

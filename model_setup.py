@@ -25,8 +25,8 @@ def get_yolo_keypoints_from_pil(img_pil, yolo_model, conf_thresh=0.25):
     areas = (boxes.xyxy[:, 2] - boxes.xyxy[:, 0]) * (boxes.xyxy[:, 3] - boxes.xyxy[:, 1])
     idx = torch.argmax(areas).item()
 
-    kpts_xy_norm = result.keypoints.xyn[idx].cpu().numpy()  # [K, 2]
-    return kpts_xy_norm
+    kpts = result.keypoints.xy[idx].cpu().numpy()
+    return kpts
 
 
 from transformers import AutoImageProcessor, AutoModel
