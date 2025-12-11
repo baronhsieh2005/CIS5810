@@ -41,88 +41,70 @@ def compute_angle(v1, v2):
     return float(np.degrees(np.arccos(cos_val)))
 
 
-def barbell_normal(kpts):
-    L_wr, R_wr = kpts[9], kpts[10]
-    bar_vec = R_wr - L_wr
-    bar_vec = bar_vec / (np.linalg.norm(bar_vec) + 1e-8)
+def sideways_flare_angle(shoulder, elbow, torso_vec):
+    """
+    Computes sideways flare angle:
+    angle between upper arm (shoulder→elbow)
+    and outward torso normal (perpendicular to shoulder line).
+    """
 
-    # outward lateral direction
-    normal = np.array([bar_vec[1], -bar_vec[0]])
-    return normal / (np.linalg.norm(normal) + 1e-8)
+    # Normalize torso vector (shoulder line)
+    torso_vec = torso_vec / (np.linalg.norm(torso_vec) + 1e-8)
 
+    # Outward normal to torso (perpendicular)
+    normal_vec = np.array([torso_vec[1], -torso_vec[0]])
+    normal_vec = normal_vec / (np.linalg.norm(normal_vec) + 1e-8)
 
-def sideways_flare_angle(shoulder, elbow, normal):
+    # Upper arm vector
     upper = elbow - shoulder
     upper = upper / (np.linalg.norm(upper) + 1e-8)
 
-    angle = compute_angle(upper, normal)
+    # Angle between upper arm and torso-normal
+    angle = compute_angle(upper, normal_vec)
+
+    # Fold into biomechanical range 0–90°
     if angle > 90:
         angle = 180 - angle
-    return angle
+
+    return float(angle)
 
 
-def elbow_drop_metric(shoulder, elbow, shoulder_width):
-    # elbow dropping sideways/backwards relative to shoulder level
-    vertical = elbow[1] - shoulder[1]
-    return vertical / (shoulder_width + 1e-8)
-
-
-def classify_flare(kpts, side_threshold=75.0, drop_threshold=0.45):
+def classify_flare(kpts, threshold_deg=70.0):
     """
-    NEW BEHAVIOR:
+    FINAL simplified flare classifier:
 
-    - Flare is determined ONLY by sideways angle.
-    - Drop no longer triggers flare.
-    - Drop triggers a photo-quality warning suggesting a retake.
-
-    Returns both:
-      - flare flags
-      - retake suggestion flags
+    - Uses ONLY sideways flare angle.
+    - Flared if angle >= threshold_deg.
+    - Overall flare = True if EITHER arm crosses threshold.
     """
+
+    # Shoulder keypoints
     L_sh, R_sh = kpts[5], kpts[6]
+
+    # Elbows
     L_el, R_el = kpts[7], kpts[8]
 
-    shoulder_width = float(np.linalg.norm(R_sh - L_sh))
-    normal = barbell_normal(kpts)
+    # Torso line (left shoulder → right shoulder)
+    torso_vec = R_sh - L_sh
 
-    # SIDEWAYS flare angle (primary biomechanical signal)
-    L_side = float(sideways_flare_angle(L_sh, L_el, normal))
-    R_side = float(sideways_flare_angle(R_sh, R_el, normal))
+    # Compute sideways flare angles
+    left_angle  = sideways_flare_angle(L_sh, L_el, torso_vec)
+    right_angle = sideways_flare_angle(R_sh, R_el, torso_vec)
 
-    # DROP metric (camera/lighting/angle guardrail)
-    L_drop = float(elbow_drop_metric(L_sh, L_el, shoulder_width))
-    R_drop = float(elbow_drop_metric(R_sh, R_el, shoulder_width))
+    # Apply threshold
+    left_flared  = bool(left_angle  >= threshold_deg)
+    right_flared = bool(right_angle >= threshold_deg)
 
-    # Flare is ONLY sideways-based now
-    L_flared = bool(L_side > side_threshold)
-    R_flared = bool(R_side > side_threshold)
-
-    # Retake suggestion is ONLY drop-based now
-    L_retake = bool(L_drop > drop_threshold)
-    R_retake = bool(R_drop > drop_threshold)
+    # Final classification: either side → flared
+    either_flared = bool(left_flared or right_flared)
 
     return {
-        "left_side_angle_deg":  L_side,
-        "right_side_angle_deg": R_side,
-        "left_drop_norm":       L_drop,
-        "right_drop_norm":      R_drop,
-
-        "left_flared":          L_flared,
-        "right_flared":         R_flared,
-
-        # NEW fields for UX
-        "left_retake_suggested":  L_retake,
-        "right_retake_suggested": R_retake,
-        "retake_suggested":       bool(L_retake or R_retake),
-
-        "side_threshold_deg":   float(side_threshold),
-        "drop_threshold_norm":  float(drop_threshold),
-
-        # Optional: a human-readable hint for the app
-        "note": (
-            "Flare is determined by sideways angle only. "
-            "Drop is used as a camera/angle/lighting guardrail."
-        )
+        "left_angle_deg":   left_angle,
+        "right_angle_deg":  right_angle,
+        "threshold_deg":    threshold_deg,
+        "left_flared":      left_flared,
+        "right_flared":     right_flared,
+        "either_flared":    either_flared
     }
 
 # Old elbow flare implementation
