@@ -67,36 +67,63 @@ def elbow_drop_metric(shoulder, elbow, shoulder_width):
     return vertical / (shoulder_width + 1e-8)
 
 
-def classify_flare(kpts, side_threshold=30.0, drop_threshold=0.20):
+def classify_flare(kpts, side_threshold=75.0, drop_threshold=0.45):
+    """
+    NEW BEHAVIOR:
+
+    - Flare is determined ONLY by sideways angle.
+    - Drop no longer triggers flare.
+    - Drop triggers a photo-quality warning suggesting a retake.
+
+    Returns both:
+      - flare flags
+      - retake suggestion flags
+    """
     L_sh, R_sh = kpts[5], kpts[6]
     L_el, R_el = kpts[7], kpts[8]
 
     shoulder_width = float(np.linalg.norm(R_sh - L_sh))
     normal = barbell_normal(kpts)
 
-    # SIDEWAYS flare angle (bar-normal method)
+    # SIDEWAYS flare angle (primary biomechanical signal)
     L_side = float(sideways_flare_angle(L_sh, L_el, normal))
     R_side = float(sideways_flare_angle(R_sh, R_el, normal))
 
-    # DOWNWARD flare / elbow drop
+    # DROP metric (camera/lighting/angle guardrail)
     L_drop = float(elbow_drop_metric(L_sh, L_el, shoulder_width))
     R_drop = float(elbow_drop_metric(R_sh, R_el, shoulder_width))
 
-    # SMART classification
-    L_flared = bool((L_side > side_threshold) or (L_drop > drop_threshold))
-    R_flared = bool((R_side > side_threshold) or (R_drop > drop_threshold))
+    # Flare is ONLY sideways-based now
+    L_flared = bool(L_side > side_threshold)
+    R_flared = bool(R_side > side_threshold)
+
+    # Retake suggestion is ONLY drop-based now
+    L_retake = bool(L_drop > drop_threshold)
+    R_retake = bool(R_drop > drop_threshold)
 
     return {
         "left_side_angle_deg":  L_side,
         "right_side_angle_deg": R_side,
         "left_drop_norm":       L_drop,
         "right_drop_norm":      R_drop,
+
         "left_flared":          L_flared,
         "right_flared":         R_flared,
-        "side_threshold_deg":   float(side_threshold),
-        "drop_threshold_norm":  float(drop_threshold)
-    }
 
+        # NEW fields for UX
+        "left_retake_suggested":  L_retake,
+        "right_retake_suggested": R_retake,
+        "retake_suggested":       bool(L_retake or R_retake),
+
+        "side_threshold_deg":   float(side_threshold),
+        "drop_threshold_norm":  float(drop_threshold),
+
+        # Optional: a human-readable hint for the app
+        "note": (
+            "Flare is determined by sideways angle only. "
+            "Drop is used as a camera/angle/lighting guardrail."
+        )
+    }
 
 # Old elbow flare implementation
 """

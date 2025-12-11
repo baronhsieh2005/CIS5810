@@ -130,14 +130,21 @@ async def elbow_line_angle_api(file: UploadFile = File(...)):
     kpts = results[0].keypoints.xy[0].cpu().numpy()
     return analyze_elbow_line(kpts)
 
+
 @app.post("/elbow_flare")
-async def elbow_flare_api(file: UploadFile = File(...), threshold: float = 40.0):
+async def elbow_flare_api(
+    file: UploadFile = File(...),
+    threshold: float = 75.0,
+    drop_threshold: float = 0.45,  # NEW param exposed
+):
     """
     Classifies elbow flare from a BENCH-PRESS LOWERED POSITION image.
-    Assumes img contains a clear bottom-position rep.
+
+    NEW BEHAVIOR:
+    - 'threshold' controls ONLY sideways flare classification.
+    - 'drop_threshold' controls ONLY retake suggestion (photo-quality guardrail).
     """
 
-    # Read img
     contents = await file.read()
     try:
         img = Image.open(io.BytesIO(contents)).convert("RGB")
@@ -146,15 +153,17 @@ async def elbow_flare_api(file: UploadFile = File(...), threshold: float = 40.0)
 
     img_np = np.array(img)
 
-    # YOLO Pose Detection
     results = yolo_model.predict(img_np, verbose=False)
     if len(results) == 0 or len(results[0].keypoints.xy) == 0:
         raise HTTPException(status_code=422, detail="No person detected")
 
-    # Get keypoints for first detected person
-    kpts = results[0].keypoints.xy[0].cpu().numpy()  # shape (17,2)
+    kpts = results[0].keypoints.xy[0].cpu().numpy()
 
-    # Flare classification from helper file
-    analysis = classify_flare(kpts, side_threshold=threshold)
+    # NOTE: threshold -> side_threshold only
+    analysis = classify_flare(
+        kpts,
+        side_threshold=threshold,
+        drop_threshold=drop_threshold
+    )
 
     return analysis

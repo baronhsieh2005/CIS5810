@@ -1,11 +1,11 @@
 import csv
 from pathlib import Path
 
-root = Path("./images")
-out_csv = root / "bench_phase_labels.csv"
+root = Path("./dead_lift_variant/images")
+out_csv = root / "deadlift_phase_labels.csv"
 
 rows = []
-for phase_label, subdir in [("lowering", "lowering"), ("pushing", "pushing")]:
+for phase_label, subdir in [("lowering", "lowering"), ("lifting", "lifting"), ("lockup", "lockup")]:
     for img_path in sorted((root / subdir).glob("*.jpg")):
         parts = img_path.stem.split("-")
         # Optional: infer video_id / frame_idx from filename if you follow a convention
@@ -14,7 +14,7 @@ for phase_label, subdir in [("lowering", "lowering"), ("pushing", "pushing")]:
         rows.append({
             "video_id": video_id,
             "frame_idx": frame_idx,
-            "img_path": "/content/drive/MyDrive/CIS_5810_Final_Project" + str(img_path),
+            "img_path": str(img_path),
             "phase_label": phase_label,
         })
 

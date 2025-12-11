@@ -1,4 +1,3 @@
-
 runs/
 *.pt
 custom_dataset
@@ -7,3 +6,4 @@ raw_frames_discarded
 results
 test
 vit_squat_model
+images

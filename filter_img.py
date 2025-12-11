@@ -1,36 +1,34 @@
 from pathlib import Path
 
 # 1) UPDATE THESE PATHS to match your setup
-original_dir = Path("./images")
-train_dir    = Path("./custom_dataset/train")
-val_dir      = Path("./custom_dataset/val")
-
-lower_dir = Path("./images/lowering")
-push_dir = Path("./images/pushing")
-
-lower_count = 0
-push_count = 0
-
-for p in lower_dir.glob("*.jpg"):
-    lower_count += 1
-
-for p in push_dir.glob("*.jpg"):
-    push_count += 1
-
-print("Push:", push_count)
-print("Lower:", lower_count)
-
-
-res_dir = Path("./runs/pose/predict3")
+original_dir = Path("./dead_lift_variant/images")
+lifting_dir    = Path("./dead_lift_variant/custom_dataset/lifting")
+lockup_dir  = Path("./dead_lift_variant/custom_dataset/lockup")
+lowering_dir = Path("./dead_lift_variant/custom_dataset/lowering")
 
 # 2) Build a set of filenames to KEEP (from train + val)
 keep_names = set()
 
-for p in train_dir.glob("*.jpg"):
-    keep_names.add(p.name)
+lift = 0
+lockup = 0
+lower = 0
 
-for p in val_dir.glob("*.jpg"):
+for p in lifting_dir.glob("*.jpg"):
     keep_names.add(p.name)
+    lift += 1
+
+for p in lockup_dir.glob("*.jpg"):
+    keep_names.add(p.name)
+    lockup += 1
+
+for p in lowering_dir.glob("*.jpg"):
+    keep_names.add(p.name)
+    lower += 1
+
+print("Lift:", lift)
+print("Lock:", lockup)
+print("Lower:", lower)
+
 
 print("Number of kept filenames:", len(keep_names))
 list(sorted(list(keep_names))[:10])

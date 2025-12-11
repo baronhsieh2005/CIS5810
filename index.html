@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Bench Press Phase Detector</title>
+  <title>Bench Press Form Analyzer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
@@ -23,7 +23,7 @@
 
     .container {
       width: 100%;
-      max-width: 640px;
+      max-width: 680px;
       margin: 16px;
       padding: 24px;
       border-radius: 18px;
@@ -35,14 +35,14 @@
     h1 {
       margin-top: 0;
       margin-bottom: 4px;
-      font-size: 1.5rem;
+      font-size: 1.55rem;
       letter-spacing: 0.03em;
     }
 
     .subtitle {
       margin-top: 0;
       margin-bottom: 16px;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       color: #9ca3af;
     }
 
@@ -77,9 +77,7 @@
       color: #9ca3af;
     }
 
-    #file-input {
-      display: none;
-    }
+    #file-input { display: none; }
 
     .preview-wrapper {
       margin-top: 16px;
@@ -140,6 +138,8 @@
       color: #9ca3af;
     }
 
+    /* ---------- Cards ---------- */
+
     .result-card {
       margin-top: 20px;
       padding: 16px;
@@ -148,7 +148,18 @@
       border: 1px solid rgba(56, 189, 248, 0.5);
     }
 
-    .result-header {
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #9ca3af;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 0 0 10px 0;
+    }
+
+    .phase-header {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
@@ -162,7 +173,7 @@
       gap: 6px;
       border-radius: 999px;
       padding: 6px 12px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       background: rgba(15, 23, 42, 0.9);
@@ -217,6 +228,154 @@
       transition: width 0.3s ease-out;
     }
 
+    /* ---------- Form Check Visual Language ---------- */
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 620px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .check-card {
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(2, 6, 23, 0.35);
+    }
+
+    .check-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .check-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      background: rgba(15, 23, 42, 0.7);
+      white-space: nowrap;
+    }
+
+    .badge.good {
+      border-color: rgba(34, 197, 94, 0.65);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .badge.warn {
+      border-color: rgba(248, 113, 113, 0.75);
+      background: rgba(248, 113, 113, 0.12);
+    }
+
+    .lr-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 6px 0 10px 0;
+    }
+
+    .lr-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.6);
+    }
+
+    .lr-chip.good {
+      border-color: rgba(34, 197, 94, 0.65);
+      background: rgba(34, 197, 94, 0.10);
+    }
+
+    .lr-chip.warn {
+      border-color: rgba(248, 113, 113, 0.75);
+      background: rgba(248, 113, 113, 0.10);
+    }
+
+    .chip-side {
+      opacity: 0.8;
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .metric-line {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .metric-muted {
+      color: #9ca3af;
+      font-size: 0.78rem;
+      margin-top: 6px;
+      line-height: 1.35;
+    }
+
+    /* Tilt meter */
+    .tilt-track {
+      margin-top: 10px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tilt-mid {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: rgba(148, 163, 184, 0.7);
+    }
+
+    .tilt-indicator {
+      position: absolute;
+      top: -3px;
+      width: 10px;
+      height: 14px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #38bdf8, #22c55e);
+      transform: translateX(-50%);
+      transition: left 0.25s ease-out, filter 0.2s ease-out;
+      filter: brightness(1);
+    }
+
+    .tilt-indicator.warn {
+      background: linear-gradient(135deg, #f87171, #fbbf24);
+      filter: brightness(1.05);
+    }
+
     .error {
       margin-top: 12px;
       padding: 10px 12px;
@@ -226,14 +385,22 @@
       color: #fecaca;
       font-size: 0.85rem;
     }
+
+    .soft-divider {
+      height: 1px;
+      margin: 14px 0;
+      background: linear-gradient(90deg, transparent, rgba(148,163,184,0.35), transparent);
+    }
+
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Bench Press Phase Detector</h1>
+    <h1>Bench Press Form Analyzer</h1>
     <p class="subtitle">
-      Upload a bench-press frame and we’ll classify it as
-      <strong>lowering</strong> or <strong>pushing</strong> using your YOLO + DINOv3 model.
+      Upload a bench-press frame and we’ll predict your
+      <strong>phase</strong> and also run two quick <strong>form checks</strong> using YOLO keypoints:
+      <em>bar leveling</em> and <em>elbow flare</em>.
     </p>
 
     <div id="upload-area" class="upload-area">
@@ -248,12 +415,15 @@
     </div>
 
     <div class="controls">
-      <button id="predict-btn" disabled>Run Prediction</button>
+      <button id="predict-btn" disabled>Analyze Frame</button>
       <span class="status" id="status-text">No image selected.</span>
     </div>
 
-    <div id="result" class="result-card" style="display: none;">
-      <div class="result-header">
+    <!-- Phase result -->
+    <div id="phase-result" class="result-card" style="display: none;">
+      <div class="section-title">Phase Prediction (YOLO → DINOv3 → MLP)</div>
+
+      <div class="phase-header">
         <div>
           <div class="phase-pill">
             <span class="dot"></span>
@@ -285,12 +455,103 @@
       </div>
     </div>
 
+    <!-- Form checks -->
+    <div id="form-result" class="result-card" style="display: none;">
+      <div class="section-title">Form Checks (YOLO Keypoints)</div>
+
+      <div class="form-grid">
+        <!-- Leveling -->
+        <div class="check-card">
+          <div class="check-title">
+            <div class="check-name">Bar Leveling</div>
+            <span id="level-badge" class="badge">—</span>
+          </div>
+
+          <div class="metric-line">
+            <span>Elbow line angle</span>
+            <span><strong id="level-angle-text">—</strong></span>
+          </div>
+          <div class="metric-line">
+            <span>Threshold</span>
+            <span id="level-thresh-text">—</span>
+          </div>
+
+          <div class="tilt-track">
+            <div class="tilt-mid"></div>
+            <div id="tilt-indicator" class="tilt-indicator" style="left: 50%;"></div>
+          </div>
+
+          <div id="level-guidance" class="metric-muted"></div>
+        </div>
+
+        <!-- Elbow flare -->
+        <div class="check-card">
+          <div class="check-title">
+            <div class="check-name">Elbows</div>
+            <span id="flare-badge" class="badge">—</span>
+            <span id="retake-badge" class="badge">—</span>
+          </div>
+
+          <div class="lr-row">
+            <span id="left-flare-chip" class="lr-chip">
+              <span class="chip-side">Left</span>
+              <span id="left-flare-verdict">—</span>
+            </span>
+            <span id="right-flare-chip" class="lr-chip">
+              <span class="chip-side">Right</span>
+              <span id="right-flare-verdict">—</span>
+            </span>
+          </div>
+
+          <div class="metric-line">
+            <span>Left side angle</span>
+            <span><strong id="left-side-angle-text">—</strong></span>
+          </div>
+          <div class="metric-line">
+            <span>Right side angle</span>
+            <span><strong id="right-side-angle-text">—</strong></span>
+          </div>
+
+          <div class="metric-line">
+            <span>Side threshold</span>
+            <span id="flare-thresh-text">—</span>
+          </div>
+
+          <div class="soft-divider"></div>
+
+          <div class="metric-line">
+            <span>Left drop norm</span>
+            <span><strong id="left-drop-text">—</strong></span>
+          </div>
+          <div class="metric-line">
+            <span>Right drop norm</span>
+            <span><strong id="right-drop-text">—</strong></span>
+          </div>
+          <div class="metric-line">
+            <span>Drop threshold</span>
+            <span id="drop-thresh-text">—</span>
+          </div>
+
+          <div id="flare-guidance" class="metric-muted"></div>
+        </div>
+      </div>
+
+      <div class="soft-divider"></div>
+      <div class="metric-muted">
+        Tip: elbow flare is evaluated from side-angle only. If you see a “Retake suggested” warning,
+        try a more centered front view with clearer lighting to improve reliability.
+      </div>
+    </div>
+
     <div id="error-box" class="error" style="display: none;"></div>
   </div>
 
   <script>
-    // Change this if your backend runs elsewhere
-    const API_URL = "http://localhost:8000/predict";
+    // Backend endpoints
+    const API_BASE = "http://localhost:8000";
+    const API_PREDICT = `${API_BASE}/predict`;
+    const API_LEVEL = `${API_BASE}/elbow_line_angle`;
+    const API_FLARE = `${API_BASE}/elbow_flare`;
 
     const uploadArea = document.getElementById("upload-area");
     const fileInput = document.getElementById("file-input");
@@ -298,28 +559,87 @@
     const previewImage = document.getElementById("preview-image");
     const predictBtn = document.getElementById("predict-btn");
     const statusText = document.getElementById("status-text");
-    const resultCard = document.getElementById("result");
+
+    const phaseCard = document.getElementById("phase-result");
+    const formCard = document.getElementById("form-result");
+
     const phaseLabelEl = document.getElementById("phase-label");
     const confidenceText = document.getElementById("confidence-text");
     const probLoweringText = document.getElementById("prob-lowering-text");
     const probPushingText = document.getElementById("prob-pushing-text");
     const probLoweringBar = document.getElementById("prob-lowering-bar");
     const probPushingBar = document.getElementById("prob-pushing-bar");
+
+    const levelBadge = document.getElementById("level-badge");
+    const levelAngleText = document.getElementById("level-angle-text");
+    const levelThreshText = document.getElementById("level-thresh-text");
+    const levelGuidance = document.getElementById("level-guidance");
+    const tiltIndicator = document.getElementById("tilt-indicator");
+
+    const flareBadge = document.getElementById("flare-badge");
+    const retakeBadge = document.getElementById("retake-badge");
+    const leftFlareChip = document.getElementById("left-flare-chip");
+    const rightFlareChip = document.getElementById("right-flare-chip");
+    const leftFlareVerdict = document.getElementById("left-flare-verdict");
+    const rightFlareVerdict = document.getElementById("right-flare-verdict");
+    const leftSideAngleText = document.getElementById("left-side-angle-text");
+    const rightSideAngleText = document.getElementById("right-side-angle-text");
+    const flareThreshText = document.getElementById("flare-thresh-text");
+    const leftDropText = document.getElementById("left-drop-text");
+    const rightDropText = document.getElementById("right-drop-text");
+    const dropThreshText = document.getElementById("drop-thresh-text");
+    const flareGuidance = document.getElementById("flare-guidance");
+
     const errorBox = document.getElementById("error-box");
 
     let selectedFile = null;
 
-    function resetResult() {
-      resultCard.style.display = "none";
+    function hideAllResults() {
+      phaseCard.style.display = "none";
+      formCard.style.display = "none";
       errorBox.style.display = "none";
+
       probLoweringBar.style.width = "0%";
       probPushingBar.style.width = "0%";
+
+      // reset badges
+      levelBadge.className = "badge";
+      flareBadge.className = "badge";
+      retakeBadge.className = "badge";
+
+      levelBadge.textContent = "—";
+      flareBadge.textContent = "—";
+      retakeBadge.textContent = "—";
+
+      // reset chips
+      leftFlareChip.className = "lr-chip";
+      rightFlareChip.className = "lr-chip";
+      leftFlareVerdict.textContent = "—";
+      rightFlareVerdict.textContent = "—";
+
+      // reset tilt
+      tiltIndicator.className = "tilt-indicator";
+      tiltIndicator.style.left = "50%";
+
+      // reset texts
+      levelAngleText.textContent = "—";
+      levelThreshText.textContent = "—";
+      leftSideAngleText.textContent = "—";
+      rightSideAngleText.textContent = "—";
+      flareThreshText.textContent = "—";
+      leftDropText.textContent = "—";
+      rightDropText.textContent = "—";
+      dropThreshText.textContent = "—";
+
+      levelGuidance.textContent = "";
+      flareGuidance.textContent = "";
     }
 
     function showError(msg) {
       errorBox.textContent = msg;
       errorBox.style.display = "block";
-      resultCard.style.display = "none";
+      phaseCard.style.display = "none";
+      formCard.style.display = "none";
     }
 
     function handleFile(file) {
@@ -330,46 +650,78 @@
       }
 
       selectedFile = file;
-      resetResult();
+      hideAllResults();
 
       const reader = new FileReader();
       reader.onload = (e) => {
         previewImage.src = e.target.result;
         previewWrapper.style.display = "block";
         predictBtn.disabled = false;
-        statusText.textContent = "Ready to predict.";
+        statusText.textContent = "Ready to analyze.";
       };
       reader.readAsDataURL(file);
     }
 
-    // Click to open file picker
-    uploadArea.addEventListener("click", () => {
-      fileInput.click();
-    });
+    uploadArea.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", (e) => handleFile(e.target.files[0]));
 
-    // File selected via picker
-    fileInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      handleFile(file);
-    });
-
-    // Drag & drop
     uploadArea.addEventListener("dragover", (e) => {
       e.preventDefault();
       uploadArea.classList.add("dragover");
     });
-
     uploadArea.addEventListener("dragleave", (e) => {
       e.preventDefault();
       uploadArea.classList.remove("dragover");
     });
-
     uploadArea.addEventListener("drop", (e) => {
       e.preventDefault();
       uploadArea.classList.remove("dragover");
-      const file = e.dataTransfer.files[0];
-      handleFile(file);
+      handleFile(e.dataTransfer.files[0]);
     });
+
+    async function postImage(url, file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(url, { method: "POST", body: formData });
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      return { res, data };
+    }
+
+    function setBadge(el, ok, goodText, badText) {
+      el.classList.remove("good", "warn");
+      if (ok) {
+        el.classList.add("good");
+        el.textContent = `✅ ${goodText}`;
+      } else {
+        el.classList.add("warn");
+        el.textContent = `⚠️ ${badText}`;
+      }
+    }
+
+    function setChip(chipEl, verdictEl, ok) {
+      chipEl.classList.remove("good", "warn");
+      if (ok) {
+        chipEl.classList.add("good");
+        verdictEl.textContent = "Good";
+      } else {
+        chipEl.classList.add("warn");
+        verdictEl.textContent = "Flared";
+      }
+    }
+
+    // Map angle to a gentle UI slider:
+    // 0° => center
+    // 30° => near edge
+    function setTiltIndicator(angleAbsDeg, thresholdDeg, isLevel) {
+      const clamped = Math.min(30, Math.max(0, angleAbsDeg));
+      const offset = (clamped / 30) * 40;  // 0..40
+      const leftPercent = 50 + offset;     // 50..90
+      tiltIndicator.style.left = `${leftPercent}%`;
+
+      tiltIndicator.classList.remove("warn");
+      if (!isLevel) tiltIndicator.classList.add("warn");
+    }
 
     // Call backend
     predictBtn.addEventListener("click", async () => {
@@ -378,51 +730,147 @@
         return;
       }
 
-      resetResult();
+      hideAllResults();
       predictBtn.disabled = true;
-      statusText.textContent = "Running prediction...";
+      statusText.textContent = "Analyzing phase + form checks...";
 
       try {
-        const formData = new FormData();
-        formData.append("file", selectedFile);
+        // Fire all three requests in parallel
+        const [pred, level, flare] = await Promise.all([
+          postImage(API_PREDICT, selectedFile),
+          postImage(API_LEVEL, selectedFile),
+          postImage(API_FLARE, selectedFile),
+        ]);
 
-        const res = await fetch(API_URL, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          let detail = "Prediction failed.";
-          try {
-            const err = await res.json();
-            if (err && err.detail) {
-              detail = err.detail;
-            }
-          } catch (_) {}
-          showError(detail);
-          statusText.textContent = "Error during prediction.";
+        // If all failed, show a combined error
+        const allFailed = !pred.res.ok && !level.res.ok && !flare.res.ok;
+        if (allFailed) {
+          const msg =
+            (pred.data && pred.data.detail) ||
+            (level.data && level.data.detail) ||
+            (flare.data && flare.data.detail) ||
+            "Analysis failed. Check backend logs.";
+          showError(msg);
+          statusText.textContent = "Error during analysis.";
           predictBtn.disabled = false;
           return;
         }
 
-        const data = await res.json();
-        const phase = data.phase;
-        const probs = data.probabilities || {};
-        const pLowering = probs.lowering ?? 0;
-        const pPushing = probs.pushing ?? 0;
+        /* ---------- Phase card ---------- */
+        if (pred.res.ok && pred.data) {
+          const data = pred.data;
+          const phase = data.phase;
+          const probs = data.probabilities || {};
+          const pLowering = probs.lowering ?? 0;
+          const pPushing = probs.pushing ?? 0;
 
-        phaseLabelEl.textContent = phase;
-        const confidence = phase === "lowering" ? pLowering : pPushing;
-        confidenceText.textContent = `Confidence: ${(confidence * 100).toFixed(1)}%`;
+          phaseLabelEl.textContent = phase;
 
-        probLoweringText.textContent = (pLowering * 100).toFixed(1) + "%";
-        probPushingText.textContent = (pPushing * 100).toFixed(1) + "%";
-        probLoweringBar.style.width = (pLowering * 100).toFixed(1) + "%";
-        probPushingBar.style.width = (pPushing * 100).toFixed(1) + "%";
+          const confidence = phase === "lowering" ? pLowering : pPushing;
+          confidenceText.textContent = `Confidence: ${(confidence * 100).toFixed(1)}%`;
 
-        resultCard.style.display = "block";
+          probLoweringText.textContent = (pLowering * 100).toFixed(1) + "%";
+          probPushingText.textContent = (pPushing * 100).toFixed(1) + "%";
+          probLoweringBar.style.width = (pLowering * 100).toFixed(1) + "%";
+          probPushingBar.style.width = (pPushing * 100).toFixed(1) + "%";
+
+          phaseCard.style.display = "block";
+        }
+
+        /* ---------- Leveling card ---------- */
+        if (level.res.ok && level.data) {
+          const d = level.data;
+
+          const angle = Number(d.elbow_line_angle_deg ?? 0);
+          const angleAbs = Number(d.elbow_line_angle_abs_deg ?? Math.abs(angle));
+          const isLevel = Boolean(d.is_level);
+          const thresh = Number(d.level_threshold_deg ?? 10);
+
+          levelAngleText.textContent = `${angleAbs.toFixed(1)}°`;
+          levelThreshText.textContent = `${thresh.toFixed(1)}°`;
+
+          setBadge(levelBadge, isLevel, "Level", "Not level");
+
+          setTiltIndicator(angleAbs, thresh, isLevel);
+
+          levelGuidance.textContent = isLevel
+            ? "Your elbows are horizontally aligned. This suggests the bar path is level for this frame."
+            : "One elbow sits higher than the other. Focus on even drive through both arms and keep the bar balanced across the chest.";
+
+        } else {
+          levelBadge.textContent = "— Not available";
+        }
+
+        /* ---------- Flare card (UPDATED LOGIC) ---------- */
+        if (flare.res.ok && flare.data) {
+          const d = flare.data;
+
+          // Side-angle flare (PRIMARY)
+          const leftFlared = Boolean(d.left_flared);
+          const rightFlared = Boolean(d.right_flared);
+
+          const leftSide = Number(d.left_side_angle_deg ?? 0);
+          const rightSide = Number(d.right_side_angle_deg ?? 0);
+          const sideThresh = Number(d.side_threshold_deg ?? 75);
+
+          const flareAnyBad = leftFlared || rightFlared;
+
+          // Drop guardrail (PHOTO QUALITY)
+          const leftDrop = Number(d.left_drop_norm ?? 0);
+          const rightDrop = Number(d.right_drop_norm ?? 0);
+          const dropThresh = Number(d.drop_threshold_norm ?? 0.45);
+
+          const leftRetake = Boolean(d.left_retake_suggested ?? (leftDrop > dropThresh));
+          const rightRetake = Boolean(d.right_retake_suggested ?? (rightDrop > dropThresh));
+          const retakeSuggested = Boolean(d.retake_suggested ?? (leftRetake || rightRetake));
+
+          // Update numbers
+          leftSideAngleText.textContent = `${leftSide.toFixed(1)}°`;
+          rightSideAngleText.textContent = `${rightSide.toFixed(1)}°`;
+          flareThreshText.textContent = `${sideThresh.toFixed(1)}°`;
+
+          leftDropText.textContent = leftDrop.toFixed(2);
+          rightDropText.textContent = rightDrop.toFixed(2);
+          dropThreshText.textContent = dropThresh.toFixed(2);
+
+          // L/R chips are still flare-only
+          setChip(leftFlareChip, leftFlareVerdict, !leftFlared);
+          setChip(rightFlareChip, rightFlareVerdict, !rightFlared);
+
+          // Main flare badge uses ONLY side-angle verdict now
+          setBadge(flareBadge, !flareAnyBad, "Tucked", "Flared");
+
+          // Photo-quality badge from drop guardrail
+          setBadge(retakeBadge, !retakeSuggested, "Good photo", "Retake suggested");
+
+          // Guidance text combines both signals
+          if (!flareAnyBad && !retakeSuggested) {
+            flareGuidance.textContent =
+              "Elbow position looks safely tucked for this bottom-position frame, and the photo angle/lighting appears suitable for reliable analysis.";
+          } else if (flareAnyBad && !retakeSuggested) {
+            flareGuidance.textContent =
+              "At least one elbow appears too wide based on side angle. Try cueing 'elbows 30–45° from torso' and keep wrists stacked over elbows.";
+          } else if (!flareAnyBad && retakeSuggested) {
+            flareGuidance.textContent =
+              "Elbow flare looks OK based on side angle, but this photo may be affected by camera angle/lighting. Try a more centered front view with clear lighting and stable framing.";
+          } else {
+            flareGuidance.textContent =
+              "Elbow flare appears present based on side angle, and the photo may also be affected by camera angle/lighting. Retake from a clearer front view, then re-check.";
+          }
+
+        } else {
+          flareBadge.textContent = "— Not available";
+          retakeBadge.textContent = "— Not available";
+        }
+
+        // Show form card if any form endpoint succeeded
+        if ((level.res.ok && level.data) || (flare.res.ok && flare.data)) {
+          formCard.style.display = "block";
+        }
+
         errorBox.style.display = "none";
-        statusText.textContent = "Prediction complete.";
+        statusText.textContent = "Analysis complete.";
+
       } catch (err) {
         console.error(err);
         showError("Network error. Make sure the backend is running.");
