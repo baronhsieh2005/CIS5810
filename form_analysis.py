@@ -3,7 +3,6 @@ import numpy as np
 def elbow_line_angle(left_elbow, right_elbow):
     """
     Returns the acute angle (0–90°) between the elbow–elbow line and horizontal.
-    This is the correct metric for bench press symmetry.
     """
     dx = right_elbow[0] - left_elbow[0]
     dy = right_elbow[1] - left_elbow[1]
@@ -71,11 +70,8 @@ def sideways_flare_angle(shoulder, elbow, torso_vec):
 
 def classify_flare(kpts, threshold_deg=70.0):
     """
-    FINAL simplified flare classifier:
-
-    - Uses ONLY sideways flare angle.
     - Flared if angle >= threshold_deg.
-    - Overall flare = True if EITHER arm crosses threshold.
+    - Overall flare = True if either arm crosses threshold.
     """
 
     # Shoulder keypoints
@@ -106,78 +102,3 @@ def classify_flare(kpts, threshold_deg=70.0):
         "right_flared":     right_flared,
         "either_flared":    either_flared
     }
-
-# Old elbow flare implementation
-"""
-def compute_angle(v1, v2):
-    
-    Returns angle between two vectors in degrees.
-    Always in 0–180°, clipping used to avoid NaNs.
-    
-    dot = float(np.dot(v1, v2))
-    denom = (np.linalg.norm(v1) * np.linalg.norm(v2)) + 1e-8
-    cos_val = np.clip(dot / denom, -1.0, 1.0)
-    return float(np.degrees(np.arccos(cos_val)))
-
-
-def elbow_flare_angle(shoulder, elbow, torso_vec):
-    Computes elbow flare angle using the CORRECT biomechanical definition:
-
-    flare angle = angle between:
-        - the upper-arm vector (shoulder → elbow)
-        - the outward normal of the shoulder-to-shoulder line
-
-    This works for front-view, incline bench, and most gym camera angles.
-
-    # Normalize torso (shoulder line)
-    torso_vec = torso_vec / (np.linalg.norm(torso_vec) + 1e-8)
-
-    # Perpendicular (normal) vector to torso line: OUTWARD direction
-    normal = np.array([torso_vec[1], -torso_vec[0]])
-    normal = normal / (np.linalg.norm(normal) + 1e-8)
-
-    # Upper arm vector
-    upper = elbow - shoulder
-    upper = upper / (np.linalg.norm(upper) + 1e-8)
-
-    # Compute flare angle (0–180°)
-    angle = compute_angle(upper, normal)
-
-    # Fold into 0–90° biomechanical range
-    if angle > 90:
-        angle = 180 - angle
-
-    return float(angle)
-
-
-def classify_flare(kpts, threshold=40.0):
-    
-    Classifies elbow flare given YOLO keypoints for a single person.
-
-    Assumes image is from the bottom of the bench press (lowered),
-    so flare evaluation is always performed.
-    
-
-    # Shoulders
-    L_sh = kpts[5]
-    R_sh = kpts[6]
-
-    # Elbows
-    L_el = kpts[7]
-    R_el = kpts[8]
-
-    # Shoulder line: left → right
-    torso_line = R_sh - L_sh
-
-    # Compute angles
-    left_angle  = elbow_flare_angle(L_sh, L_el, torso_line)
-    right_angle = elbow_flare_angle(R_sh, R_el, torso_line)
-
-    return {
-        "left_angle_deg":  left_angle,
-        "right_angle_deg": right_angle,
-        "left_flared":     left_angle  > threshold,
-        "right_flared":    right_angle > threshold,
-        "threshold_deg":   threshold
-    }
-"""

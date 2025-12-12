@@ -9,7 +9,6 @@ from openai import OpenAI
 import base64
 
 
-
 from model_setup import (
     get_yolo_keypoints_from_pil,
     get_dino_patch_features,
@@ -43,7 +42,9 @@ Examples: scapular retraction, bar path, breathing, leg drive, etc.
 ------------------------------------------------------------
 SECTION 2 — TAILORED FEEDBACK (BASED ONLY ON INPUT DATA)
 Give personalized advice ONLY about issues that are visible in:
-- the provided image
+- the provided image solely and do not use other data that is provided, make it easier to understand for the general public (do not use
+too complicated anatomy terms and treat it like giving gym feedback to a beginner trying to correct their form), and also provide more feedback 
+as well as words of encouragement
 ------------------------------------------------------------
 SECTION 3 — EXPLANATIONS (CITE THE INPUT VALUES)
 For EACH tailored correction you gave in Section 2:
@@ -139,27 +140,6 @@ async def predict(file: UploadFile = File(...)):
         },
     }
 
-"""
-@app.post("/analyze_form")
-async def analyze_bench_form(file: UploadFile = File(...)):
-    contents = await file.read()
-    img_pil = Image.open(io.BytesIO(contents)).convert("RGB")
-    img_np = np.array(img_pil)
-
-    # Run YOLO Pose
-    results = yolo_model.predict(img_np, save=False, verbose=False)
-    if len(results) == 0 or len(results[0].keypoints.xy) == 0:
-        raise HTTPException(status_code=422, detail="No person detected")
-
-    kpts = results[0].keypoints.xy[0].cpu().numpy()
-
-    # Run form analysis
-    analysis = analyze_form(kpts)
-
-    return analysis
-
-"""
-
 @app.post("/elbow_line_angle")
 async def elbow_line_angle_api(file: UploadFile = File(...)):
     contents = await file.read()
@@ -174,14 +154,9 @@ async def elbow_line_angle_api(file: UploadFile = File(...)):
 async def elbow_flare_api(
     file: UploadFile = File(...),
     threshold: float = 70.0,
-    drop_threshold: float = 0.45,  # NEW param exposed
 ):
     """
-    Classifies elbow flare from a BENCH-PRESS LOWERED POSITION image.
-
-    NEW BEHAVIOR:
-    - 'threshold' controls ONLY sideways flare classification.
-    - 'drop_threshold' controls ONLY retake suggestion (photo-quality guardrail).
+    Classifies elbow flare from a bench press lowered position image.
     """
 
     contents = await file.read()
@@ -205,36 +180,6 @@ async def elbow_flare_api(
 
     return analysis
 
-def build_llm_payload(image_bytes, kpts, bar_analysis, flare_analysis):
-    """
-    Combines:
-      - raw image
-      - YOLO keypoints
-      - barbell level metrics
-      - elbow flare metrics
-    into a structured dictionary for the LLM.
-    """
-
-    return {
-        "image": image_bytes,  # send to OpenAI as binary content
-        "keypoints": kpts.tolist(),
-
-        "bar_level": {
-            "angle_deg": bar_analysis["elbow_line_angle_deg"],
-            "is_level": bar_analysis["is_level"],
-            "abs_angle_deg": bar_analysis["elbow_line_angle_abs_deg"]
-        },
-
-        "elbow_flare": {
-            "left_angle_deg": flare_analysis["left_angle_deg"],
-            "right_angle_deg": flare_analysis["right_angle_deg"],
-            "threshold_deg": flare_analysis["threshold_deg"],
-            "left_flared": flare_analysis["left_flared"],
-            "right_flared": flare_analysis["right_flared"],
-            "either_flared": flare_analysis["either_flared"]
-        }
-    }
-
 client = OpenAI()
 
 @app.post("/analyze_with_llm")
@@ -250,40 +195,31 @@ async def analyze_with_llm(
 
     contents = await file.read()
 
-    # --- Load image ---
     try:
         img = Image.open(io.BytesIO(contents)).convert("RGB")
     except:
         raise HTTPException(status_code=400, detail="Invalid image file")
     img_np = np.array(img)
 
-    # --- YOLO Pose ---
     results = yolo_model.predict(img_np, verbose=False)
     if len(results) == 0 or results[0].keypoints is None:
         raise HTTPException(status_code=422, detail="No person detected")
 
     kpts = results[0].keypoints.xy[0].cpu().numpy()
 
-    # --- Barbell level ---
     bar_analysis = analyze_elbow_line(kpts, level_threshold_deg=bar_level_threshold)
 
-    # --- Elbow flare ---
     flare_analysis = classify_flare(
         kpts,
         threshold_deg=flare_threshold
     )
 
-    # --- Build LLM payload ---
     payload = {
-        "bar_level": bar_analysis,
-        "elbow_flare": flare_analysis,
         "keypoints": kpts.tolist()
     }
 
-    # Encode image as base64 for LLM
     image_b64 = base64.b64encode(contents).decode("utf-8")
 
-    # --- OpenAI LLM call ---
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
@@ -301,7 +237,7 @@ async def analyze_with_llm(
                         {payload}
 
                         Only base tailored feedback on:
-                        - the image
+                        - the image and the keypoints
 
                         Do not mention or correct unrelated features.
                         """

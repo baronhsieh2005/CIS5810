@@ -4,7 +4,7 @@ from datasets import load_dataset
 import numpy as np
 import evaluate
 
-# 1. Load dataset (folder must be structured by class names)
+# 1. Load dataset
 dataset = load_dataset("imagefolder", data_dir="./custom_dataset", split="train")
 dataset = dataset.train_test_split(test_size=0.2)
 train_dataset = dataset["train"]
